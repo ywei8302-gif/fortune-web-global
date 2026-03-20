@@ -7,7 +7,9 @@ Overseas website MVP for US, Europe, and Asia audiences.
 - Next.js 16 (App Router, TypeScript)
 - Tailwind CSS
 - API route: `/api/fortune`
-- Optional OpenAI integration (falls back to local generator when no key is set)
+- Qwen (DashScope) integration (primary)
+- Optional OpenAI fallback
+- Local fallback if no API key is configured
 
 ## Local Run
 
@@ -29,17 +31,21 @@ cp .env.example .env.local
 
 Set:
 
-- `OPENAI_API_KEY` (optional for MVP)
+- `DASHSCOPE_API_KEY` (recommended)
+- `DASHSCOPE_MODEL` (optional, default: `qwen-turbo`)
+- `OPENAI_API_KEY` (optional fallback)
 
-If missing, the app still works with local fallback responses.
+If all keys are missing, the app still works with local fallback responses.
 
 ## Deploy (Vercel)
 
 1. Push this folder to GitHub.
 2. In Vercel, click **Add New Project** and import the repo.
 3. Framework preset: **Next.js**.
-4. Add environment variable:
-   - `OPENAI_API_KEY` (optional but recommended for production quality)
+4. Add environment variables:
+   - `DASHSCOPE_API_KEY` (recommended)
+   - `DASHSCOPE_MODEL=qwen-turbo` (optional)
+   - `OPENAI_API_KEY` (optional fallback)
 5. Click **Deploy**.
 6. Bind your custom domain in Vercel + configure DNS in Cloudflare.
 

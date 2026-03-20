@@ -44,6 +44,31 @@ async function callOpenAI(prompt: string, apiKey: string) {
   return data.output_text || "";
 }
 
+async function callDashScope(prompt: string, apiKey: string, model: string) {
+  const response = await fetch("https://dashscope.aliyuncs.com/api/v1/services/aigc/text-generation/generation", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+    },
+    body: JSON.stringify({
+      model,
+      input: { prompt },
+      parameters: {
+        temperature: 0.3,
+        top_p: 0.8,
+        max_tokens: 3500,
+      },
+    }),
+  });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`DashScope HTTP ${response.status}: ${text.slice(0, 240)}`);
+  }
+  const data = (await response.json()) as { output?: { text?: string } };
+  return data.output?.text || "";
+}
+
 function localFallback(body: ReqBody) {
   const name = safeStr(body.name || "缘主");
   const question = safeStr(body.message || "未提供");
@@ -103,15 +128,34 @@ export async function POST(request: Request) {
 `.trim();
 
     let reportText = "";
-    const apiKey = process.env.OPENAI_API_KEY;
-    if (apiKey) {
+    let modelUsed = "local-fallback";
+
+    const dashscopeKey = process.env.DASHSCOPE_API_KEY;
+    const dashscopeModel = process.env.DASHSCOPE_MODEL || "qwen-turbo";
+    if (dashscopeKey) {
       try {
-        reportText = await callOpenAI(prompt, apiKey);
+        reportText = await callDashScope(prompt, dashscopeKey, dashscopeModel);
+        modelUsed = `dashscope:${dashscopeModel}`;
       } catch {
-        reportText = localFallback(body);
+        reportText = "";
       }
-    } else {
+    }
+
+    if (!reportText) {
+      const openaiKey = process.env.OPENAI_API_KEY;
+      if (openaiKey) {
+        try {
+          reportText = await callOpenAI(prompt, openaiKey);
+          modelUsed = "openai:gpt-4.1-mini";
+        } catch {
+          reportText = "";
+        }
+      }
+    }
+
+    if (!reportText) {
       reportText = localFallback(body);
+      modelUsed = "local-fallback";
     }
 
     return NextResponse.json({
@@ -127,7 +171,7 @@ export async function POST(request: Request) {
       gua: body.gua || {},
       meta: {
         version: "WEB-Replica-1.0",
-        model: apiKey ? "openai:gpt-4.1-mini" : "local-fallback",
+        model: modelUsed,
       },
     });
   } catch (err) {
