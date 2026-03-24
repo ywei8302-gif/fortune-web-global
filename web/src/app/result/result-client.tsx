@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { buildLineCompare } from "@/lib/iching";
 import { readOrder, saveOrder, type LocalOrder } from "@/lib/orders";
@@ -29,6 +29,53 @@ const emptyAi: AiState = {
   disclaimer: "",
 };
 
+type ReportSection = {
+  id: string;
+  title: string;
+  content: string;
+};
+
+function normalizeTitle(raw: string) {
+  return raw.replace(/\*\*/g, "").trim();
+}
+
+function splitReportSections(report: string): ReportSection[] {
+  const text = (report || "").trim();
+  if (!text) return [];
+  const lines = text.split(/\r?\n/);
+  const headingRe = /^\s*(\d+、.*|【今明后应事落点】|\*\*今日\*\*|\*\*明日\*\*|\*\*后日\*\*|今日|明日|后日)\s*$/;
+  const sections: ReportSection[] = [];
+  let currentTitle = "总览";
+  let buffer: string[] = [];
+
+  const flush = () => {
+    const content = buffer.join("\n").trim();
+    if (!content && sections.length) return;
+    const idx = sections.length + 1;
+    sections.push({
+      id: `sec-${idx}`,
+      title: currentTitle,
+      content: content || "暂无内容",
+    });
+    buffer = [];
+  };
+
+  for (const line of lines) {
+    if (headingRe.test(line.trim())) {
+      if (sections.length || buffer.length) flush();
+      currentTitle = normalizeTitle(line);
+      continue;
+    }
+    buffer.push(line);
+  }
+  flush();
+  return sections;
+}
+
+function isKeyLine(line: string) {
+  return /综上|结论|宜|忌|最利|最忌|建议|行动|今日|明日|后日/.test(line);
+}
+
 export function ResultClient({ orderId }: { orderId: string }) {
   const router = useRouter();
 
@@ -38,6 +85,8 @@ export function ResultClient({ orderId }: { orderId: string }) {
   const [isLoading, setIsLoading] = useState(false);
   const [order, setOrder] = useState<LocalOrder | null>(null);
   const [ai, setAi] = useState<AiState>(emptyAi);
+  const [openSections, setOpenSections] = useState<Record<string, boolean>>({});
+  const reportSections = useMemo(() => splitReportSections(ai.guaXiangXiangPi || ""), [ai.guaXiangXiangPi]);
 
   useEffect(() => {
     if (!orderId) {
@@ -116,6 +165,17 @@ export function ResultClient({ orderId }: { orderId: string }) {
     }
   }
 
+  useEffect(() => {
+    if (!reportSections.length) return;
+    setOpenSections((prev) => {
+      const next = { ...prev };
+      reportSections.forEach((sec, idx) => {
+        if (next[sec.id] === undefined) next[sec.id] = idx < 2;
+      });
+      return next;
+    });
+  }, [reportSections]);
+
   if (!loaded) {
     return <main className="hero-bg min-h-screen p-6">数据加载中…</main>;
   }
@@ -134,6 +194,15 @@ export function ResultClient({ orderId }: { orderId: string }) {
   if (!order) return null;
 
   const lines = buildLineCompare(order.params.gua);
+
+  function jumpToSection(id: string) {
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  function toggleSection(id: string) {
+    setOpenSections((prev) => ({ ...prev, [id]: !prev[id] }));
+  }
 
   return (
     <main className="hero-bg mystic-page min-h-screen p-4 md:p-8">
@@ -190,16 +259,55 @@ export function ResultClient({ orderId }: { orderId: string }) {
                 {isLoading && <p className="text-sm text-slate-500">宗师正在凝神推演...</p>}
                 {!isLoading && (
                   <>
-                    <div className="rounded-2xl border border-slate-200 bg-white/95 p-4">
-                      <p className="mb-2 text-sm tracking-[0.15em] text-amber-700">FULL TEXT</p>
-                      <pre className="whitespace-pre-wrap text-sm leading-8 text-slate-700">{ai.guaXiangXiangPi || "暂无内容"}</pre>
+                    <div className="no-print rounded-2xl border border-slate-200 bg-white/95 p-4">
+                      <p className="mb-2 text-sm tracking-[0.15em] text-amber-700">阅读导航</p>
+                      <div className="flex flex-wrap gap-2">
+                        {reportSections.map((section) => (
+                          <button key={section.id} className="mystic-toc-btn" onClick={() => jumpToSection(section.id)}>
+                            {section.title}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                    <div className="mt-4 flex gap-3">
+
+                    <div className="mt-4 space-y-3">
+                      {reportSections.length === 0 && (
+                        <div className="rounded-2xl border border-slate-200 bg-white/95 p-4">
+                          <p className="text-sm text-slate-700">暂无内容</p>
+                        </div>
+                      )}
+                      {reportSections.map((section) => {
+                        const isOpen = !!openSections[section.id];
+                        const linesText = section.content.split(/\r?\n/);
+                        return (
+                          <article id={section.id} key={section.id} className="rounded-2xl border border-slate-200 bg-white/95 p-4">
+                            <button className="no-print flex w-full items-center justify-between text-left" onClick={() => toggleSection(section.id)}>
+                              <h3 className="text-base font-semibold text-slate-800">{section.title}</h3>
+                              <span className="text-xs text-slate-500">{isOpen ? "收起" : "展开"}</span>
+                            </button>
+                            {isOpen && (
+                              <div className="mt-3 space-y-2">
+                                {linesText.map((line, idx) => (
+                                  <p key={`${section.id}-${idx}`} className={isKeyLine(line) ? "mystic-key-line" : "text-sm leading-8 text-slate-700"}>
+                                    {line || "　"}
+                                  </p>
+                                ))}
+                              </div>
+                            )}
+                          </article>
+                        );
+                      })}
+                    </div>
+
+                    <div className="no-print mt-4 flex gap-3">
                       <button
                         className="mystic-ghost-btn"
                         onClick={() => navigator.clipboard.writeText(ai.guaXiangXiangPi || "")}
                       >
                         复制全文
+                      </button>
+                      <button className="mystic-ghost-btn" onClick={() => window.print()}>
+                        打印报告
                       </button>
                     </div>
                   </>
