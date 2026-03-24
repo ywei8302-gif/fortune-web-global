@@ -154,6 +154,7 @@ export function ResultClient({ orderId }: { orderId: string }) {
             <p className="mt-1 text-sm text-slate-600">出生：{order.params.birthDate}（{order.params.shiChen}）</p>
             {order.params.message && <p className="mt-1 text-sm text-slate-600">心念：{order.params.message}</p>}
             {order.params.direction && <p className="mt-1 text-sm text-slate-600">方位：{order.params.direction}</p>}
+            {order.params.clickLocal && <p className="mt-1 text-sm text-slate-600">起卦时间：{order.params.clickLocal}</p>}
 
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
               <p className="font-semibold">卦象结构</p>

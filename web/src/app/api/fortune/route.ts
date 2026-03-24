@@ -101,30 +101,99 @@ async function callDashScope(prompt: string, apiKey: string, model: string) {
   return data.output?.text || "";
 }
 
+function stripCodeFences(s: string) {
+  const t = safeStr(s).trim();
+  if (t.startsWith("```")) {
+    return t.replace(/^```[a-zA-Z]*\s*/, "").replace(/```[\s]*$/, "").trim();
+  }
+  return t;
+}
+
+function safeJsonParseMaybe(text: string) {
+  const t0 = stripCodeFences(text);
+  const t = t0.replace(/^\uFEFF/, "").trim();
+  try {
+    return JSON.parse(t) as { md?: { report?: string } };
+  } catch {
+    const i = t.indexOf("{");
+    const j = t.lastIndexOf("}");
+    if (i >= 0 && j > i) {
+      return JSON.parse(t.slice(i, j + 1)) as { md?: { report?: string } };
+    }
+    throw new Error("JSON parse failed");
+  }
+}
+
+function extractReportText(raw: string) {
+  const text = safeStr(raw || "").trim();
+  if (!text) return "";
+  try {
+    const parsed = safeJsonParseMaybe(text);
+    const mdReport = safeStr(parsed?.md?.report || "").trim();
+    if (mdReport) return mdReport;
+  } catch {
+    // ignore and fallback raw
+  }
+  return text;
+}
+
 const SYSTEM_PROMPT_FULL = `
 你是一位融会贯通了《周易本义》《说卦传》《梅花易数》《金口诀》《六爻神断》《卜筮正宗》《增删卜易》《滴天髓》《渊海子平》《三命通会》的玄学算命推理大宗师。
 
 请根据用户提供的准确排盘信息，严格按照以下要求进行断课。
 
 【核心规则】
-1. 文风要求：七成古文，三成白话，语气要威严、专业、老练。
-2. 数据忠实：今日是【DAY1】，明日是【DAY2】，后日是【DAY3】。用户属【ZODIAC】。严禁更改这些数据。
-3. 格式严格：必须完全遵守下方输出结构，禁止出现“正文：”。
+1. **文风要求**：**七成古文**（引用古籍原文，言简意赅），**三成白话**（直断吉凶，点破天机）。语气要威严、专业、老练。
+2. **数据忠实**：今日是【DAY1】，明日是【DAY2】，后日是【DAY3】。用户属【ZODIAC】。严禁更改这些数据。
+3. **格式严格**：必须完全遵守下方的【输出模版】，禁止出现“正文：”字样，直接列点。
 
-【输出结构】
-1、论性格
-2、论本卦
-3、论动爻
-4、论变卦
-5、论梅花
-6、论六爻
-7、金口诀
-8、论决断
+【输出模版】
+
+1、**论性格**：
+   （引用《滴天髓》或《三命通会》断语）... 结合姓名与【USER_YEAR】年命，断其性格底色为... 格局为... 流年运势...（指出鲜为人知的矛盾点）。
+
+2、**论本卦**：
+   （引用《周易本义》或《说卦传》解释【HEXAGRAM】）... 此卦之象...
+
+3、**论动爻**：
+   （若无动爻）：卦无动爻，乃...之象（引用古籍解释静卦含义）。
+   （若有动爻）：动爻在第【MOVING_LINES】爻...（引用《说卦传》断其变数）。
+
+4、**论变卦**：
+   变卦为【CHANGED_HEX】...（引用《周易》断终局）。
+
+5、**论梅花**：
+   体用生克... 主客关系...（论强弱与走势）。
+
+6、**论六爻**：
+   （依据《卜筮正宗》与《六爻神断》）... 世应关系... 六亲（官鬼/兄弟/妻财）之旺衰... 精准定位矛盾点...
+
+7、**金口诀**：
+   方位【DIRECTION】... 特殊神煞...（论利弊）。
+
+8、**论决断**：
+   （融合上述七点）... 综上所述，此事...（给出一锤定音的最终定论）。
 
 【今明后应事落点】
-今日：宜忌 + 动向
-明日：宜忌 + 动向
-后日：宜忌 + 动向
+
+**今日**
+- **宜忌**：（结合五行生克）宜... 忌... 幸运色：...
+- **动向**：依据《金口诀》神煞与五行喜忌，推算今日之**贵神/财神/凶煞**方位。直接指出今日**最利何方**（如贵神方）与**最忌何方**（如五鬼方），并给出具体的趋吉避凶建议。
+
+**明日**
+- **宜忌**：（结合五行生克）宜... 忌... 幸运色：...
+- **动向**：依据《金口诀》神煞与五行喜忌，推算明日之**贵神/财神/凶煞**方位。直接指出明日**最利何方**（如贵神方）与**最忌何方**（如五鬼方），并给出具体的趋吉避凶建议。
+
+**后日**
+- **宜忌**：（结合五行生克）宜... 忌... 幸运色：...
+- **动向**：依据《金口诀》神煞与五行喜忌，推算后日之**贵神/财神/凶煞**方位。直接指出后日**最利何方**（如贵神方）与**最忌何方**（如五鬼方），并给出具体的趋吉避凶建议。
+
+【输出格式（严格 JSON）】
+{
+  "md": {
+    "report": "Markdown 格式的推演全文"
+  }
+}
 `.trim();
 
 function localFallback(body: ReqBody) {
@@ -167,10 +236,13 @@ export async function POST(request: Request) {
     const zodiac = getZodiac(birthStr);
     const threeDays = getGanZhiThreeDays(safeStr(body.clickLocal || ""));
 
+    const movingLineText = Array.isArray(body.gua?.movingLines) && body.gua?.movingLines?.length ? body.gua?.movingLines?.join("、") : "无";
+
     const prompt = `
 ${SYSTEM_PROMPT_FULL}
 
-用户所问: ${safeStr(body.message)}
+【求测档案】
+用户所问: ${safeStr(body.message || "")}
 用户姓名: ${safeStr(body.name || "缘主")}
 用户年份: ${birthYear} (属${zodiac})
 完整生辰: ${birthStr}
@@ -178,7 +250,7 @@ ${SYSTEM_PROMPT_FULL}
 起卦时间: ${safeStr(body.clickLocal || "")}
 本卦: ${safeStr(body.gua?.hexagram || "")}
 变卦: ${safeStr(body.gua?.changed?.hexagram || "")}
-动爻位置: ${Array.isArray(body.gua?.movingLines) && body.gua?.movingLines?.length ? body.gua?.movingLines?.join("、") : "无"}
+动爻位置: ${movingLineText}
 
 【物理排盘结果（必须严格执行）】
 DAY1: ${threeDays.day1}
@@ -187,7 +259,7 @@ DAY3: ${threeDays.day3}
 ZODIAC: ${zodiac}
 HEXAGRAM: ${safeStr(body.gua?.hexagram || "")}
 CHANGED_HEX: ${safeStr(body.gua?.changed?.hexagram || "")}
-MOVING_LINES: ${Array.isArray(body.gua?.movingLines) && body.gua?.movingLines?.length ? body.gua?.movingLines?.join("、") : "无"}
+MOVING_LINES: ${movingLineText}
 DIRECTION: ${safeStr(body.direction || "南方")}
 USER_YEAR: ${birthYear}
 `.trim();
@@ -199,7 +271,8 @@ USER_YEAR: ${birthYear}
     const dashscopeModel = process.env.DASHSCOPE_MODEL || "qwen-turbo";
     if (dashscopeKey) {
       try {
-        reportText = await callDashScope(prompt, dashscopeKey, dashscopeModel);
+        const rawText = await callDashScope(prompt, dashscopeKey, dashscopeModel);
+        reportText = extractReportText(rawText);
         modelUsed = `dashscope:${dashscopeModel}`;
       } catch {
         reportText = "";
@@ -210,7 +283,8 @@ USER_YEAR: ${birthYear}
       const openaiKey = process.env.OPENAI_API_KEY;
       if (openaiKey) {
         try {
-          reportText = await callOpenAI(prompt, openaiKey);
+          const rawText = await callOpenAI(prompt, openaiKey);
+          reportText = extractReportText(rawText);
           modelUsed = "openai:gpt-4.1-mini";
         } catch {
           reportText = "";
