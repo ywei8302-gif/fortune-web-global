@@ -117,14 +117,14 @@ export function ResultClient({ orderId }: { orderId: string }) {
   }
 
   if (!loaded) {
-    return <main className="min-h-screen p-6">数据加载中…</main>;
+    return <main className="hero-bg min-h-screen p-6">数据加载中…</main>;
   }
   if (error) {
     return (
-      <main className="min-h-screen p-6">
-        <div className="mx-auto max-w-3xl rounded-2xl border bg-white p-6">
+      <main className="hero-bg min-h-screen p-6">
+        <div className="glass soft-border mx-auto max-w-3xl rounded-2xl p-6">
           <p>{error}</p>
-          <button className="mt-4 rounded-xl bg-slate-900 px-4 py-2 text-white" onClick={() => router.push("/")}>
+          <button className="primary-btn mt-4" onClick={() => router.push("/")}>
             返回
           </button>
         </div>
@@ -136,67 +136,81 @@ export function ResultClient({ orderId }: { orderId: string }) {
   const lines = buildLineCompare(order.params.gua);
 
   return (
-    <main className="min-h-screen bg-slate-100 p-4 md:p-8">
-      <section className="mx-auto max-w-4xl rounded-3xl border bg-white p-6">
-        <h1 className="text-2xl font-bold">推演报告</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          姓名：{order.params.name} · 出生：{order.params.birthDate}（{order.params.shiChen}）
-        </p>
-        {order.params.message && <p className="mt-1 text-sm text-slate-600">心念：{order.params.message}</p>}
-        {order.params.direction && <p className="mt-1 text-sm text-slate-600">方位：{order.params.direction}</p>}
-
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <p className="font-semibold">卦象结构</p>
-          <p className="mt-1 text-sm text-slate-600">
-            本卦：{order.params.gua.hexagram || "未知"} ｜ 变卦：{order.params.gua.changed.hexagram || "未知"} ｜ 动爻：
-            {order.params.gua.movingLines.length ? `第${order.params.gua.movingLines.join("、")}爻` : "无"}
-          </p>
-          <div className="mt-4 grid gap-1">
-            {lines.map((line) => (
-              <div key={line.idx} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                <div className={`h-2 rounded ${line.leftType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
-                <span className={`text-xs ${line.isMove ? "text-red-600" : "text-slate-500"}`}>{line.idx}爻</span>
-                <div className={`h-2 rounded ${line.rightType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
-              </div>
-            ))}
+    <main className="hero-bg min-h-screen p-4 md:p-8">
+      <section className="mx-auto max-w-5xl">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p className="text-xs tracking-[0.15em] text-amber-700">MASTER REPORT</p>
+            <h1 className="text-3xl font-bold">推演报告</h1>
           </div>
+          <button className="rounded-xl border border-slate-300 bg-white px-4 py-2 text-sm" onClick={() => router.push("/")}>
+            返回首页
+          </button>
         </div>
 
-        {isPaid ? (
-          <div className="mt-6">
-            {isLoading && <p className="text-sm text-slate-500">宗师正在凝神推演...</p>}
-            {!isLoading && (
-              <>
-                <div className="rounded-2xl border p-4">
-                  <p className="font-semibold">卦象推演</p>
-                  <pre className="mt-2 whitespace-pre-wrap text-sm leading-7">{ai.guaXiangXiangPi || "暂无内容"}</pre>
-                </div>
-                <div className="mt-4 flex gap-3">
-                  <button className="rounded-xl border px-4 py-2" onClick={() => router.push("/")}>
-                    返回首页
-                  </button>
-                  <button
-                    className="rounded-xl bg-slate-900 px-4 py-2 text-white"
-                    onClick={() => navigator.clipboard.writeText(ai.guaXiangXiangPi || "")}
-                  >
-                    复制全文
-                  </button>
-                </div>
-              </>
+        <div className="grid gap-5 lg:grid-cols-[0.9fr_1.1fr]">
+          <aside className="glass soft-border rounded-3xl p-5">
+            <p className="text-sm text-slate-600">姓名：{order.params.name}</p>
+            <p className="mt-1 text-sm text-slate-600">出生：{order.params.birthDate}（{order.params.shiChen}）</p>
+            {order.params.message && <p className="mt-1 text-sm text-slate-600">心念：{order.params.message}</p>}
+            {order.params.direction && <p className="mt-1 text-sm text-slate-600">方位：{order.params.direction}</p>}
+
+            <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+              <p className="font-semibold">卦象结构</p>
+              <p className="mt-1 text-sm text-slate-600">
+                本卦：{order.params.gua.hexagram || "未知"}
+                <br />
+                变卦：{order.params.gua.changed.hexagram || "未知"}
+                <br />
+                动爻：{order.params.gua.movingLines.length ? `第${order.params.gua.movingLines.join("、")}爻` : "无"}
+              </p>
+              <div className="mt-4 grid gap-2">
+                {lines.map((line) => (
+                  <div key={line.idx} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
+                    <div className={`h-2 rounded ${line.leftType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
+                    <span className={`text-xs ${line.isMove ? "text-red-600" : "text-slate-500"}`}>{line.idx}爻</span>
+                    <div className={`h-2 rounded ${line.rightType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
+                  </div>
+                ))}
+              </div>
+            </div>
+          </aside>
+
+          <section className="glass soft-border rounded-3xl p-5">
+            {isPaid ? (
+              <div>
+                {isLoading && <p className="text-sm text-slate-500">宗师正在凝神推演...</p>}
+                {!isLoading && (
+                  <>
+                    <div className="rounded-2xl border border-slate-200 bg-white p-4">
+                      <p className="mb-2 text-sm tracking-[0.15em] text-amber-700">FULL TEXT</p>
+                      <pre className="whitespace-pre-wrap text-sm leading-7">{ai.guaXiangXiangPi || "暂无内容"}</pre>
+                    </div>
+                    <div className="mt-4 flex gap-3">
+                      <button
+                        className="rounded-xl border border-slate-300 bg-white px-4 py-2"
+                        onClick={() => navigator.clipboard.writeText(ai.guaXiangXiangPi || "")}
+                      >
+                        复制全文
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                <p className="text-lg font-semibold">解锁宗师级精论</p>
+                <p className="mt-1 text-sm text-slate-600">包含：事情起因 · 事情走向 · 未来三日锦囊</p>
+                <button onClick={handlePay} disabled={isLoading} className="primary-btn mt-4">
+                  {isLoading ? "创建订单中..." : "随喜 ¥1.99 立即解锁"}
+                </button>
+                <button onClick={() => router.push("/")} className="ml-3 rounded-xl border border-slate-300 bg-white px-4 py-2">
+                  返回修改
+                </button>
+              </div>
             )}
-          </div>
-        ) : (
-          <div className="mt-6 rounded-2xl border bg-slate-50 p-6">
-            <p className="text-lg font-semibold">解锁宗师级精论</p>
-            <p className="mt-1 text-sm text-slate-600">包含：事情起因 · 事情走向 · 未来三日锦囊</p>
-            <button onClick={handlePay} disabled={isLoading} className="mt-4 rounded-xl bg-amber-700 px-4 py-2 text-white">
-              {isLoading ? "创建订单中..." : "随喜 ¥1.99 立即解锁"}
-            </button>
-            <button onClick={() => router.push("/")} className="ml-3 rounded-xl border px-4 py-2">
-              返回修改
-            </button>
-          </div>
-        )}
+          </section>
+        </div>
       </section>
     </main>
   );
