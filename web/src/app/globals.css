@@ -66,3 +66,47 @@ body {
   transform: translateY(-1px);
   box-shadow: 0 12px 28px rgba(143, 56, 0, 0.32);
 }
+
+.yao-line {
+  position: relative;
+  display: inline-block;
+  width: 130px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.yao-yang {
+  background: #0f172a;
+}
+
+.yao-yin {
+  background: transparent;
+}
+
+.yao-yin::before,
+.yao-yin::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  width: 56px;
+  height: 8px;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.yao-yin::before {
+  left: 0;
+}
+
+.yao-yin::after {
+  right: 0;
+}
+
+.yao-move.yao-yang {
+  background: #b91c1c;
+}
+
+.yao-move.yao-yin::before,
+.yao-move.yao-yin::after {
+  background: #b91c1c;
+}

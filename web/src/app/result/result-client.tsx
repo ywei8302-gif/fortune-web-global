@@ -157,21 +157,28 @@ export function ResultClient({ orderId }: { orderId: string }) {
 
             <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
               <p className="font-semibold">卦象结构</p>
-              <p className="mt-1 text-sm text-slate-600">
-                本卦：{order.params.gua.hexagram || "未知"}
-                <br />
-                变卦：{order.params.gua.changed.hexagram || "未知"}
-                <br />
-                动爻：{order.params.gua.movingLines.length ? `第${order.params.gua.movingLines.join("、")}爻` : "无"}
-              </p>
-              <div className="mt-4 grid gap-2">
+              <p className="mt-1 text-sm text-slate-600">本卦：{order.params.gua.hexagram || "未知"} ｜ 变卦：{order.params.gua.changed.hexagram || "未知"} ｜ 动爻：{order.params.gua.movingLines.length ? `第${order.params.gua.movingLines.join("、")}爻` : "无"}</p>
+              <div className="mt-4 rounded-xl border border-slate-200 overflow-hidden">
+                <div className="grid grid-cols-[1fr_auto_1fr] items-center gap-3 bg-slate-50 px-3 py-2">
+                  <span className="text-xs font-semibold text-slate-500">本卦</span>
+                  <span className="text-xs font-semibold text-slate-400">爻位</span>
+                  <span className="text-right text-xs font-semibold text-slate-500">变卦</span>
+                </div>
                 {lines.map((line) => (
-                  <div key={line.idx} className="grid grid-cols-[1fr_auto_1fr] items-center gap-3">
-                    <div className={`h-2 rounded ${line.leftType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
-                    <span className={`text-xs ${line.isMove ? "text-red-600" : "text-slate-500"}`}>{line.idx}爻</span>
-                    <div className={`h-2 rounded ${line.rightType === "yang" ? "bg-slate-900" : "bg-slate-400"}`} />
+                  <div key={line.idx} className={`grid grid-cols-[1fr_auto_1fr] items-center gap-3 border-t border-slate-100 px-3 py-2 ${line.isMove ? "bg-red-50" : "bg-white"}`}>
+                    <div className="flex justify-center">
+                      <span className={line.leftType === "yang" ? `yao-line yao-yang ${line.isMove ? "yao-move" : ""}` : `yao-line yao-yin ${line.isMove ? "yao-move" : ""}`} />
+                    </div>
+                    <span className={`text-xs font-semibold ${line.isMove ? "text-red-700" : "text-slate-500"}`}>{line.idx}爻</span>
+                    <div className="flex justify-center">
+                      <span className={line.rightType === "yang" ? `yao-line yao-yang ${line.isMove ? "yao-move" : ""}` : `yao-line yao-yin ${line.isMove ? "yao-move" : ""}`} />
+                    </div>
                   </div>
                 ))}
+                <div className="flex items-center gap-2 border-t border-slate-100 bg-slate-50 px-3 py-2">
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-600" />
+                  <span className="text-xs text-slate-500">红色标示为动爻，即变化关键位</span>
+                </div>
               </div>
             </div>
           </aside>
