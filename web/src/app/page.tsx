@@ -69,6 +69,13 @@ export default function HomePage() {
 
   return (
     <main className="hero-bg mystic-page min-h-screen p-4 md:p-8">
+      <div className="mystic-ornaments" aria-hidden>
+        <span className="orn o-taiji">☯</span>
+        <span className="orn o-bagua">☰</span>
+        <span className="orn o-bagua2">☷</span>
+        <span className="orn o-coin">◎</span>
+        <span className="orn o-ding">鼎</span>
+      </div>
       <section className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[0.88fr_1.12fr]">
         <aside className="mystic-panel animate-rise">
           <p className="mystic-pill">FORTUNE REFLECTION</p>

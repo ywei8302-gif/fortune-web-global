@@ -32,6 +32,29 @@ body {
   backdrop-filter: blur(8px);
 }
 
+.input::placeholder {
+  color: #d6c2a1;
+  opacity: 0.95;
+}
+
+input[type="date"].input {
+  color-scheme: dark;
+}
+
+input[type="date"].input::-webkit-calendar-picker-indicator {
+  filter: invert(84%) sepia(26%) saturate(586%) hue-rotate(352deg) brightness(101%) contrast(95%);
+  opacity: 0.95;
+  cursor: pointer;
+}
+
+input[type="date"].input::-webkit-datetime-edit,
+input[type="date"].input::-webkit-datetime-edit-year-field,
+input[type="date"].input::-webkit-datetime-edit-month-field,
+input[type="date"].input::-webkit-datetime-edit-day-field,
+input[type="date"].input::-webkit-datetime-edit-text {
+  color: #f4ecda;
+}
+
 .input:focus {
   border-color: #d69c48;
   box-shadow: 0 0 0 3px rgba(214, 156, 72, 0.22);
@@ -59,8 +82,73 @@ body {
   opacity: 0.35;
 }
 
+.mystic-page::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 80% 76%, rgba(226, 171, 84, 0.08) 0%, transparent 18%),
+    radial-gradient(circle at 18% 84%, rgba(208, 141, 42, 0.08) 0%, transparent 16%),
+    conic-gradient(from 270deg at 86% 24%, rgba(231, 183, 95, 0.06), transparent 35%, rgba(231, 183, 95, 0.05), transparent 60%, rgba(231, 183, 95, 0.04), transparent 100%);
+  opacity: 0.7;
+}
+
+.mystic-ornaments {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.orn {
+  position: absolute;
+  font-family: "Noto Serif SC", "STSong", "Songti SC", serif;
+  color: rgba(226, 183, 112, 0.2);
+  text-shadow: 0 0 28px rgba(176, 116, 28, 0.18);
+  user-select: none;
+}
+
+.o-taiji {
+  top: 68px;
+  right: 64px;
+  font-size: 120px;
+  transform: rotate(-10deg);
+  opacity: 0.22;
+}
+
+.o-bagua {
+  left: 54px;
+  top: 110px;
+  font-size: 84px;
+  transform: rotate(-8deg);
+}
+
+.o-bagua2 {
+  right: 120px;
+  bottom: 180px;
+  font-size: 92px;
+  transform: rotate(14deg);
+}
+
+.o-coin {
+  left: 86px;
+  bottom: 110px;
+  font-size: 110px;
+  transform: rotate(8deg);
+}
+
+.o-ding {
+  right: 42%;
+  top: 42px;
+  font-size: 70px;
+  transform: rotate(-5deg);
+  color: rgba(199, 143, 58, 0.14);
+}
+
 .mystic-panel {
   position: relative;
+  z-index: 1;
   border-radius: 28px;
   padding: 24px;
   border: 1px solid var(--panel-border);
@@ -285,6 +373,36 @@ body {
   .yao-yin::before,
   .yao-yin::after {
     width: 42px;
+  }
+
+  .o-taiji {
+    top: 58px;
+    right: 16px;
+    font-size: 78px;
+  }
+
+  .o-bagua {
+    left: 8px;
+    top: 100px;
+    font-size: 56px;
+  }
+
+  .o-bagua2 {
+    right: 20px;
+    bottom: 164px;
+    font-size: 60px;
+  }
+
+  .o-coin {
+    left: 10px;
+    bottom: 72px;
+    font-size: 72px;
+  }
+
+  .o-ding {
+    top: 24px;
+    right: 44%;
+    font-size: 48px;
   }
 }
 

@@ -206,6 +206,13 @@ export function ResultClient({ orderId }: { orderId: string }) {
 
   return (
     <main className="hero-bg mystic-page min-h-screen p-4 md:p-8">
+      <div className="mystic-ornaments" aria-hidden>
+        <span className="orn o-taiji">☯</span>
+        <span className="orn o-bagua">☳</span>
+        <span className="orn o-bagua2">☴</span>
+        <span className="orn o-coin">◍</span>
+        <span className="orn o-ding">鼎</span>
+      </div>
       <section className="mx-auto max-w-5xl">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
