@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f8fafc;
-  --foreground: #0f172a;
+  --background: #f3efe2;
+  --foreground: #1b2230;
+  --ink-soft: #5a6473;
+  --brand: #b45309;
+  --brand-strong: #8f3800;
+  --line: #d7d3c6;
 }
 
 @theme inline {
@@ -18,7 +22,13 @@ body {
 }
 
 .input {
-  @apply w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-amber-500 focus:ring-2 focus:ring-amber-200;
+  @apply w-full rounded-xl border bg-white px-3 py-2.5 text-sm outline-none transition;
+  border-color: var(--line);
+}
+
+.input:focus {
+  border-color: #c7772d;
+  box-shadow: 0 0 0 3px rgba(199, 119, 45, 0.18);
 }
 
 .card {
@@ -27,4 +37,32 @@ body {
 
 .card-title {
   @apply mb-1 text-sm font-semibold uppercase tracking-[0.12em] text-amber-700;
+}
+
+.hero-bg {
+  background:
+    radial-gradient(circle at 10% 10%, rgba(245, 158, 11, 0.24) 0%, rgba(245, 158, 11, 0) 42%),
+    radial-gradient(circle at 85% 20%, rgba(30, 58, 138, 0.18) 0%, rgba(30, 58, 138, 0) 44%),
+    linear-gradient(120deg, #fff8e7 0%, #f8f5ef 48%, #eef4ff 100%);
+}
+
+.glass {
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.78);
+  border: 1px solid rgba(255, 255, 255, 0.62);
+}
+
+.soft-border {
+  border: 1px solid var(--line);
+}
+
+.primary-btn {
+  @apply rounded-xl px-5 py-3 text-sm font-semibold text-white transition;
+  background: linear-gradient(135deg, var(--brand) 0%, var(--brand-strong) 100%);
+  box-shadow: 0 8px 24px rgba(143, 56, 0, 0.28);
+}
+
+.primary-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 12px 28px rgba(143, 56, 0, 0.32);
 }
