@@ -68,33 +68,31 @@ export default function HomePage() {
   }
 
   return (
-    <main className="hero-bg min-h-screen p-4 md:p-8">
-      <section className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[0.9fr_1.1fr]">
-        <aside className="glass soft-border rounded-3xl p-6">
-          <p className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold tracking-[0.16em] text-amber-800">
-            MASTER MODE
-          </p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight">有事您请问</h1>
-          <p className="mt-3 text-sm leading-7 text-[color:var(--ink-soft)]">本次以“心念 + 秒级时刻”起课。先定心，再定势，最后定行动。</p>
+    <main className="hero-bg mystic-page min-h-screen p-4 md:p-8">
+      <section className="mx-auto grid w-full max-w-6xl gap-5 lg:grid-cols-[0.88fr_1.12fr]">
+        <aside className="mystic-panel animate-rise">
+          <p className="mystic-pill">FORTUNE REFLECTION</p>
+          <h1 className="mystic-title mt-4">有事您请问</h1>
+          <p className="mystic-sub mt-3">心念入局，时刻起课。以此刻为锚点，拆解今明后关键应事。</p>
           <div className="mt-6 grid gap-3 text-sm">
-            <div className="soft-border rounded-2xl bg-white/80 p-3">
-              <p className="font-semibold">1. 输入个人信息</p>
-              <p className="mt-1 text-[color:var(--ink-soft)]">姓名、出生信息、心中方位与问题。</p>
+            <div className="mystic-step step-1">
+              <p className="font-semibold">01 录入信息</p>
+              <p className="mt-1 text-[color:var(--ink-soft)]">姓名、出生信息、方位与当下问题。</p>
             </div>
-            <div className="soft-border rounded-2xl bg-white/80 p-3">
-              <p className="font-semibold">2. 生成本卦与变卦</p>
-              <p className="mt-1 text-[color:var(--ink-soft)]">系统按本地算法即时起课，不依赖外部接口。</p>
+            <div className="mystic-step step-2">
+              <p className="font-semibold">02 本地起课</p>
+              <p className="mt-1 text-[color:var(--ink-soft)]">系统按本地规则即时生成本卦与变卦。</p>
             </div>
-            <div className="soft-border rounded-2xl bg-white/80 p-3">
-              <p className="font-semibold">3. 解锁完整推演</p>
-              <p className="mt-1 text-[color:var(--ink-soft)]">查看结构化报告与今明后应事落点。</p>
+            <div className="mystic-step step-3">
+              <p className="font-semibold">03 解读落点</p>
+              <p className="mt-1 text-[color:var(--ink-soft)]">得到结构化推演与今明后行动指南。</p>
             </div>
           </div>
         </aside>
 
-        <section className="glass soft-border rounded-3xl p-6">
+        <section className="mystic-panel animate-rise delay-1">
           <div className="mb-4 flex items-center justify-between">
-            <h2 className="text-xl font-semibold">起课表单</h2>
+            <h2 className="mystic-section-title">起课表单</h2>
             <p className="text-xs text-[color:var(--ink-soft)]">预计用时 30 秒</p>
           </div>
 
@@ -138,11 +136,7 @@ export default function HomePage() {
               </label>
             </div>
 
-            {birthDate && (
-              <p className="rounded-xl bg-slate-100 px-3 py-2 text-xs text-slate-600">
-                已选择：{birthDate}（{shiChen}）
-              </p>
-            )}
+            {birthDate && <p className="mystic-chip">已选择：{birthDate}（{shiChen}）</p>}
 
             <label className="grid gap-1">
               <span className="text-sm font-medium">心中所指方位（八方）</span>
@@ -157,16 +151,11 @@ export default function HomePage() {
 
             <label className="grid gap-1">
               <span className="text-sm font-medium">此刻最想问的事</span>
-              <textarea
-                className="input min-h-28"
-                placeholder="例如：今日财运如何"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-              />
+              <textarea className="input min-h-28" placeholder="例如：今日财运如何" value={message} onChange={(e) => setMessage(e.target.value)} />
             </label>
           </div>
 
-          {error && <p className="mt-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+          {error && <p className="mt-4 rounded-xl border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 
           <button onClick={submit} className="primary-btn mt-5 w-full">
             免费起课
